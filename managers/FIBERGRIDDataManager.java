@@ -1,5 +1,5 @@
 package gr.deddie.pfr.managers;
-
+import gr.deddie.pfr.dao.FibergridConnectionFactory;
 import gr.deddie.pfr.dao.FIBERGRIDMapper;
 import gr.deddie.pfr.dao.MyBatisConnectionFactory;
 import gr.deddie.pfr.model.*;
@@ -32,7 +32,7 @@ public class FIBERGRIDDataManager {
      * @return The created fault with generated ID, or null on error
      */
     public FibergridFault createFault(FibergridFault fault, List<String> photos) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
 
@@ -79,7 +79,7 @@ public class FIBERGRIDDataManager {
      * Get a fault by its internal database ID.
      */
     public FibergridFault getFaultById(Long id) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             return mapper.getFaultById(id);
@@ -95,7 +95,7 @@ public class FIBERGRIDDataManager {
      * Get a fault by its FiberGrid ID.
      */
     public FibergridFault getFaultByFibergridId(String fibergridId) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             return mapper.getFaultByFibergridId(fibergridId);
@@ -111,7 +111,7 @@ public class FIBERGRIDDataManager {
      * Get a fault by its PFR Failure ID.
      */
     public FibergridFault getFaultByPfrFailureId(Long pfrFailureId) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             return mapper.getFaultByPfrFailureId(pfrFailureId);
@@ -127,7 +127,7 @@ public class FIBERGRIDDataManager {
      * Check if a fault with the given FiberGrid ID already exists.
      */
     public boolean existsByFibergridId(String fibergridId) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             return mapper.existsByFibergridId(fibergridId);
@@ -144,7 +144,7 @@ public class FIBERGRIDDataManager {
      */
     public List<FibergridFault> getFaultsByCriteria(String status, Integer flagRelated,
                                                       Date fromDate, Date toDate, Integer maxResults) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             return mapper.getFaultsByCriteria(status, flagRelated, fromDate, toDate, maxResults);
@@ -166,7 +166,7 @@ public class FIBERGRIDDataManager {
      * @return Number of rows updated (1 on success)
      */
     public int updateFault(FibergridFault fault, List<String> photos) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
 
@@ -209,7 +209,7 @@ public class FIBERGRIDDataManager {
      * Update only the status of a fault.
      */
     public int updateFaultStatus(Long id, FibergridFaultStatus status, String updatedBy) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             int result = mapper.updateFaultStatus(id, status, updatedBy);
@@ -229,7 +229,7 @@ public class FIBERGRIDDataManager {
      * Append notes to a fault. Preserves existing notes with newline separator.
      */
     public int appendNotes(Long id, String notes, String updatedBy) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             int result = mapper.appendNotes(id, notes, updatedBy);
@@ -248,7 +248,7 @@ public class FIBERGRIDDataManager {
      * Link a PFR Failure ID to a FiberGrid fault.
      */
     public int linkPfrFailureId(Long id, Long pfrFailureId, String updatedBy) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             int result = mapper.linkPfrFailureId(id, pfrFailureId, updatedBy);
@@ -268,7 +268,7 @@ public class FIBERGRIDDataManager {
      * Soft delete a fault.
      */
     public int deleteFault(Long id, String updatedBy) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             int result = mapper.deleteFault(id, updatedBy);
@@ -290,7 +290,7 @@ public class FIBERGRIDDataManager {
      * Get all photos for a fault.
      */
     public List<FibergridFaultPhoto> getPhotosByFaultId(Long faultId) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             return mapper.getPhotosByFaultId(faultId);
@@ -311,7 +311,7 @@ public class FIBERGRIDDataManager {
      * @return The client name if valid, null otherwise
      */
     public String validateToken(String token) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             return mapper.validateToken(token);
@@ -329,7 +329,7 @@ public class FIBERGRIDDataManager {
      * Log an API request/response.
      */
     public void logApiCall(FibergridApiLog log) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
         try {
             FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
             mapper.insertApiLog(log);
