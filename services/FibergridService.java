@@ -18,14 +18,23 @@ public class FibergridService {
 
     private static final Logger logger = LogManager.getLogger(FibergridService.class);
     private final FIBERGRIDDataManager dataManager;
+    private final FibergridOutboundService outboundService;
 
     public FibergridService() {
         this.dataManager = new FIBERGRIDDataManager();
+        this.outboundService = new FibergridOutboundService();
     }
 
     // For testing with mock data manager
     public FibergridService(FIBERGRIDDataManager dataManager) {
         this.dataManager = dataManager;
+        this.outboundService = new FibergridOutboundService();
+    }
+
+    // For testing with mock dependencies
+    public FibergridService(FIBERGRIDDataManager dataManager, FibergridOutboundService outboundService) {
+        this.dataManager = dataManager;
+        this.outboundService = outboundService;
     }
 
     /**
@@ -208,16 +217,32 @@ public class FibergridService {
                 );
             }
 
+            // Track if status is changing to Resolved for outbound trigger
+            FibergridFaultStatus previousStatus = existing.getStatus();
+            FibergridFaultStatus newStatus = request.getStatus() != null ?
+                FibergridFaultStatus.fromValue(request.getStatus()) : null;
+            boolean statusChangingToResolved = newStatus == FibergridFaultStatus.RESOLVED
+                && previousStatus != FibergridFaultStatus.RESOLVED;
+
             // Apply updates
             existing.setUpdatedBy(updatedBy);
-            if (request.getStatus() != null) {
-                existing.setStatus(FibergridFaultStatus.fromValue(request.getStatus()));
+            if (newStatus != null) {
+                existing.setStatus(newStatus);
             }
             if (request.getDateResolved() != null) {
                 existing.setDateResolved(request.getDateResolved());
             }
             if (request.getContactInformation() != null) {
                 existing.setContactInformation(request.getContactInformation());
+            }
+            if (request.getEstimatedArrivalTimeDeddie() != null) {
+                existing.setEstimatedArrivalTimeDeddie(request.getEstimatedArrivalTimeDeddie());
+            }
+            if (request.getEstimatedArrivalTimeFibergrid() != null) {
+                existing.setEstimatedArrivalTimeFibergrid(request.getEstimatedArrivalTimeFibergrid());
+            }
+            if (request.getRootCause() != null) {
+                existing.setRootCause(request.getRootCause());
             }
 
             // Handle notes - append rather than replace
@@ -229,6 +254,12 @@ public class FibergridService {
             dataManager.updateFault(existing, request.getPhotos());
 
             logger.info("Updated fault: id=" + existing.getId() + ", fibergridId=" + existing.getFibergridId());
+
+            // Trigger outbound call to Fibergrid if status changed to Resolved
+            if (statusChangingToResolved) {
+                triggerOutboundStatusResolved(existing);
+            }
+
             return existing;
 
         } catch (FibergridServiceException e) {
@@ -243,7 +274,64 @@ public class FibergridService {
         }
     }
 
+    /**
+     * Trigger outbound call to Fibergrid when fault status changes to Resolved.
+     * This is a fire-and-forget operation - failures are logged but don't affect the main update.
+     *
+     * @param fault The fault that was resolved
+     */
+    private void triggerOutboundStatusResolved(FibergridFault fault) {
+        try {
+            if (outboundService == null || !outboundService.isOutboundEnabled()) {
+                logger.debug("Outbound service is disabled, skipping status resolved notification");
+                return;
+            }
+
+            logger.info("Triggering outbound status resolved for fault: id={}, fibergridId={}",
+                fault.getId(), fault.getFibergridId());
+
+            FibergridOutboundService.OutboundResult result = outboundService.sendStatusResolved(fault);
+
+            if (result.isSuccess()) {
+                logger.info("Outbound status resolved notification sent successfully for fault: {}",
+                    fault.getFibergridId());
+            } else {
+                logger.warn("Outbound status resolved notification failed for fault: {} - {} ({})",
+                    fault.getFibergridId(), result.getMessage(), result.getErrorCode());
+            }
+        } catch (Exception e) {
+            // Don't fail the main update operation if outbound call fails
+            logger.error("Error triggering outbound status resolved for fault: {}",
+                fault.getFibergridId(), e);
+        }
+    }
+
     // ==================== Fault Retrieval ====================
+
+    /**
+     * Get a fault by its internal ID.
+     */
+    public FibergridFault getFaultById(Long id) throws FibergridServiceException {
+        try {
+            FibergridFault fault = dataManager.getFaultById(id);
+            if (fault == null) {
+                throw new FibergridServiceException(
+                    FibergridServiceException.ErrorType.NOT_FOUND,
+                    "Fault not found"
+                );
+            }
+            return fault;
+        } catch (FibergridServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error retrieving fault by id", e);
+            throw new FibergridServiceException(
+                FibergridServiceException.ErrorType.INTERNAL_ERROR,
+                "Error retrieving fault",
+                e
+            );
+        }
+    }
 
     /**
      * Get a fault by its FiberGrid ID.
@@ -274,7 +362,7 @@ public class FibergridService {
      * Get faults with optional filters.
      */
     public List<FibergridFault> getFaultsByCriteria(String status, Integer flagRelated,
-                                                      Date fromDate, Date toDate, 
+                                                      Date fromDate, Date toDate,
                                                       Integer maxResults) throws FibergridServiceException {
         try {
             return dataManager.getFaultsByCriteria(status, flagRelated, fromDate, toDate, maxResults);
@@ -286,6 +374,20 @@ public class FibergridService {
                 e
             );
         }
+    }
+
+    /**
+     * Get faults with optional filters using search criteria object.
+     */
+    public List<FibergridFault> getFaultsByCriteria(FibergridFaultSearchCriteria criteria)
+            throws FibergridServiceException {
+        return getFaultsByCriteria(
+            criteria.getStatusCode(),
+            criteria.getFlagRelated(),
+            criteria.getFromDate(),
+            criteria.getToDate(),
+            criteria.getMaxResults()
+        );
     }
 
     // ==================== API Logging ====================
@@ -328,4 +430,5 @@ public class FibergridService {
         }
         return value.substring(0, maxLength - 3) + "...";
     }
+    
 }
