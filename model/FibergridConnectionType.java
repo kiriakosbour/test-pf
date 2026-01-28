@@ -11,7 +11,11 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum FibergridConnectionType {
     XT("XT"),
-    MT("MT");
+    MT("MT"),
+    FTTH("FTTH"),
+    FTTB("FTTB"),
+    CABINET("CABINET"),
+    OTHER("OTHER");
 
     private final String value;
 
@@ -48,6 +52,6 @@ public enum FibergridConnectionType {
      * Get comma-separated list of valid values for error messages.
      */
     public static String getValidValues() {
-        return "XT, MT";
+        return "XT, MT, FTTH, FTTB, CABINET, OTHER";
     }
 }

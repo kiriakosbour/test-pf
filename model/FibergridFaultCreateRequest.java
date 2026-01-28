@@ -32,6 +32,9 @@ public class FibergridFaultCreateRequest {
     @JsonProperty("date_created")
     private Date dateCreated;
 
+    @JsonProperty("date_visited")
+    private Date dateVisited;
+
     @JsonProperty("contact_information")
     private FibergridContactInformation contactInformation;
 
@@ -98,6 +101,14 @@ public class FibergridFaultCreateRequest {
         this.dateCreated = dateCreated;
     }
 
+    public Date getDateVisited() {
+        return dateVisited;
+    }
+
+    public void setDateVisited(Date dateVisited) {
+        this.dateVisited = dateVisited;
+    }
+
     public FibergridContactInformation getContactInformation() {
         return contactInformation;
     }
@@ -126,6 +137,7 @@ public class FibergridFaultCreateRequest {
         fault.setStatus(FibergridFaultStatus.fromValue(this.status));
         fault.setNotes(this.notes);
         fault.setDateCreated(this.dateCreated);
+        fault.setDateVisited(this.dateVisited);
         fault.setContactInformation(this.contactInformation);
         return fault;
     }

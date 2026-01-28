@@ -3,15 +3,11 @@ package gr.deddie.pfr.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * Status values for FiberGrid faults as defined in the API specification.
- * Maps between API string values and internal enum representation.
- */
 public enum FibergridFaultStatus {
-    RESOLVED("Resolved"),
-    PENDING_ISSUES("Pending Issues"),
-    IN_PROCESS("In process"),
-    CANCELLED("Cancelled");
+    OPEN("OPEN"),
+    IN_PROGRESS("IN_PROGRESS"),
+    RESOLVED("RESOLVED"),
+    CANCELLED("CANCELLED");
 
     private final String value;
 
@@ -26,9 +22,7 @@ public enum FibergridFaultStatus {
 
     @JsonCreator
     public static FibergridFaultStatus fromValue(String value) {
-        if (value == null) {
-            return null;
-        }
+        if (value == null) return null;
         for (FibergridFaultStatus status : FibergridFaultStatus.values()) {
             if (status.value.equalsIgnoreCase(value)) {
                 return status;

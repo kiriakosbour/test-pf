@@ -26,6 +26,15 @@ public class FibergridFaultUpdateRequest {
     @JsonProperty("date_resolved")
     private Date dateResolved;
 
+    @JsonProperty("estimated_arrival_time_deddie")
+    private String estimatedArrivalTimeDeddie;
+
+    @JsonProperty("estimated_arrival_time_fibergrid")
+    private String estimatedArrivalTimeFibergrid;
+
+    @JsonProperty("root_cause")
+    private String rootCause;
+
     @JsonProperty("contact_information")
     private FibergridContactInformation contactInformation;
 
@@ -68,6 +77,30 @@ public class FibergridFaultUpdateRequest {
         this.dateResolved = dateResolved;
     }
 
+    public String getEstimatedArrivalTimeDeddie() {
+        return estimatedArrivalTimeDeddie;
+    }
+
+    public void setEstimatedArrivalTimeDeddie(String estimatedArrivalTimeDeddie) {
+        this.estimatedArrivalTimeDeddie = estimatedArrivalTimeDeddie;
+    }
+
+    public String getEstimatedArrivalTimeFibergrid() {
+        return estimatedArrivalTimeFibergrid;
+    }
+
+    public void setEstimatedArrivalTimeFibergrid(String estimatedArrivalTimeFibergrid) {
+        this.estimatedArrivalTimeFibergrid = estimatedArrivalTimeFibergrid;
+    }
+
+    public String getRootCause() {
+        return rootCause;
+    }
+
+    public void setRootCause(String rootCause) {
+        this.rootCause = rootCause;
+    }
+
     public FibergridContactInformation getContactInformation() {
         return contactInformation;
     }
@@ -88,8 +121,10 @@ public class FibergridFaultUpdateRequest {
      * Check if this update has any fields to update.
      */
     public boolean hasUpdates() {
-        return status != null || notes != null || dateResolved != null 
-            || contactInformation != null || (photos != null && !photos.isEmpty());
+        return status != null || notes != null || dateResolved != null
+            || contactInformation != null || (photos != null && !photos.isEmpty())
+            || estimatedArrivalTimeDeddie != null || estimatedArrivalTimeFibergrid != null
+            || rootCause != null;
     }
 
     @Override

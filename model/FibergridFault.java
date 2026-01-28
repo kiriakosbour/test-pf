@@ -1,32 +1,37 @@
 package gr.deddie.pfr.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import gr.deddie.pfr.utilities.UnixTimestampSerializer;
-
-import javax.json.bind.annotation.JsonbTypeSerializer;
 import java.util.Date;
 
-/**
- * Entity class representing a FiberGrid fault record in the database.
- * Maps to the PFR_FBG_FAULTS table.
- */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class FibergridFault {
+import javax.json.bind.annotation.JsonbTypeSerializer;
 
+import gr.deddie.pfr.utilities.UnixTimestampSerializer;
+
+public class FibergridFault {
     private Long id;
     private String fibergridId;
-    private Long pfrFailureId;  // FK to PFR_FAILURES (Phase 2)
+    private Long pfrId; // Renamed from pfrFailureId to match pfr_id in YAML
     private String address;
+    private String perx; // New mandatory field: Regional Unit
+
+
+
     private Double latitude;
     private Double longitude;
     private FibergridFlagRelated flagRelated;
-    private Integer statusId;   // FK to H_PFR_FBG_STATUS
     private FibergridFaultStatus status;
+    private FibergridConnectionType connectionType; // New mandatory field
+
     private String notes;
-    @JsonbTypeSerializer(UnixTimestampSerializer.class)
     private Date dateCreated;
-    @JsonbTypeSerializer(UnixTimestampSerializer.class)
+    private Date dateUpdated; // Added for sync
     private Date dateResolved;
+
+ 
+    @JsonbTypeSerializer(UnixTimestampSerializer.class)
+    private Date dateVisited;
+    private String estimatedArrivalTimeDeddie;
+    private String estimatedArrivalTimeFibergrid;
+    private String rootCause;
     private String contactName;
     private String contactPhone;
     private String contactEmail;
@@ -59,12 +64,12 @@ public class FibergridFault {
         this.fibergridId = fibergridId;
     }
 
-    public Long getPfrFailureId() {
-        return pfrFailureId;
+    public Long getPfrId() {
+        return pfrId;
     }
 
-    public void setPfrFailureId(Long pfrFailureId) {
-        this.pfrFailureId = pfrFailureId;
+    public void setPfrId(Long pfrId) {
+        this.pfrId = pfrId;
     }
 
     public String getAddress() {
@@ -99,6 +104,14 @@ public class FibergridFault {
         this.flagRelated = flagRelated;
     }
 
+    public FibergridConnectionType getConnectionType() {
+        return connectionType;
+    }
+
+    public void setConnectionType(FibergridConnectionType connectionType) {
+        this.connectionType = connectionType;
+    }
+    
     public FibergridFaultStatus getStatus() {
         return status;
     }
@@ -129,6 +142,38 @@ public class FibergridFault {
 
     public void setDateResolved(Date dateResolved) {
         this.dateResolved = dateResolved;
+    }
+
+    public Date getDateVisited() {
+        return dateVisited;
+    }
+
+    public void setDateVisited(Date dateVisited) {
+        this.dateVisited = dateVisited;
+    }
+
+    public String getEstimatedArrivalTimeDeddie() {
+        return estimatedArrivalTimeDeddie;
+    }
+
+    public void setEstimatedArrivalTimeDeddie(String estimatedArrivalTimeDeddie) {
+        this.estimatedArrivalTimeDeddie = estimatedArrivalTimeDeddie;
+    }
+
+    public String getEstimatedArrivalTimeFibergrid() {
+        return estimatedArrivalTimeFibergrid;
+    }
+
+    public void setEstimatedArrivalTimeFibergrid(String estimatedArrivalTimeFibergrid) {
+        this.estimatedArrivalTimeFibergrid = estimatedArrivalTimeFibergrid;
+    }
+
+    public String getRootCause() {
+        return rootCause;
+    }
+
+    public void setRootCause(String rootCause) {
+        this.rootCause = rootCause;
     }
 
     public String getContactName() {
@@ -186,14 +231,14 @@ public class FibergridFault {
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
     }
-
-    public Integer getStatusId() {
-        return statusId;
+    public String getPerx() {
+        return perx;
     }
 
-    public void setStatusId(Integer statusId) {
-        this.statusId = statusId;
+    public void setPerx(String perx) {
+        this.perx = perx;
     }
+
 
     public Boolean getDeleted() {
         return deleted;
@@ -222,6 +267,14 @@ public class FibergridFault {
             this.longitude = coordinates.getLongitude();
         }
     }
+       public Date getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(Date dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
+
 
     /**
      * Create contact information object.
@@ -249,7 +302,7 @@ public class FibergridFault {
         return "FibergridFault{" +
                 "id=" + id +
                 ", fibergridId='" + fibergridId + '\'' +
-                ", pfrFailureId=" + pfrFailureId +
+                ", pfrId=" + pfrId +
                 ", address='" + address + '\'' +
                 ", status=" + status +
                 ", flagRelated=" + flagRelated +
