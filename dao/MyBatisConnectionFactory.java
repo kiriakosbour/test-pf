@@ -29,7 +29,7 @@ public class MyBatisConnectionFactory {
 
         }
 
-        factory = new SqlSessionFactoryBuilder().build(reader, "oracle_jndi");
+        factory = new SqlSessionFactoryBuilder().build(reader, "oracle_pfr_jndi");
 
     }
 

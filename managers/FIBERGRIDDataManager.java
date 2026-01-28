@@ -342,4 +342,45 @@ public class FIBERGRIDDataManager {
             sqlSession.close();
         }
     }
+
+    // ==================== Outbound Configuration ====================
+
+    /**
+     * Get outbound API configuration.
+     * Used for making outbound calls to Fibergrid.
+     *
+     * @return The active outbound configuration, or null if not configured
+     */
+    public FibergridOutboundConfig getOutboundConfig() {
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
+        try {
+            FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
+            return mapper.getOutboundConfig();
+        } catch (Exception e) {
+            logger.error("Exception in getOutboundConfig", e);
+            return null;
+        } finally {
+            sqlSession.close();
+        }
+    }
+
+    /**
+     * Check if a request_id has already been successfully processed.
+     * Used for idempotency to prevent duplicate outbound calls.
+     *
+     * @param requestId The unique request ID (UUID)
+     * @return true if the request was already successfully processed
+     */
+    public boolean isRequestIdProcessed(String requestId) {
+        SqlSession sqlSession = FibergridConnectionFactory.getSqlSessionFactory().openSession();
+        try {
+            FIBERGRIDMapper mapper = sqlSession.getMapper(FIBERGRIDMapper.class);
+            return mapper.isRequestIdProcessed(requestId);
+        } catch (Exception e) {
+            logger.error("Exception in isRequestIdProcessed", e);
+            return false;
+        } finally {
+            sqlSession.close();
+        }
+    }
 }

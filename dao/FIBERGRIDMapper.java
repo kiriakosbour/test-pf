@@ -3,6 +3,7 @@ package gr.deddie.pfr.dao;
 import gr.deddie.pfr.model.FibergridApiLog;
 import gr.deddie.pfr.model.FibergridFault;
 import gr.deddie.pfr.model.FibergridFaultPhoto;
+import gr.deddie.pfr.model.FibergridOutboundConfig;
 import org.apache.ibatis.annotations.*;
 
 import java.util.Date;
@@ -25,11 +26,13 @@ public interface FIBERGRIDMapper {
      */
     @Insert("INSERT INTO PFR_FBG_FAULTS " +
             "(FIBERGRID_ID, PFR_FAILURE_ID, ADDRESS, LATITUDE, LONGITUDE, FLAG_RELATED, STATUS_ID, " +
-            "NOTES, DATE_CREATED, DATE_RESOLVED, CONTACT_NAME, CONTACT_PHONE, CONTACT_EMAIL, CREATED_BY) " +
+            "NOTES, DATE_CREATED, DATE_RESOLVED, DATE_VISITED, ESTIMATED_ARRIVAL_TIME_DEDDIE, " +
+            "ESTIMATED_ARRIVAL_TIME_FIBERGRID, ROOT_CAUSE, CONTACT_NAME, CONTACT_PHONE, CONTACT_EMAIL, CREATED_BY) " +
             "VALUES " +
             "(#{fibergridId}, #{pfrFailureId}, #{address}, #{latitude}, #{longitude}, #{flagRelated.value}, " +
             "(SELECT ID FROM H_PFR_FBG_STATUS WHERE CODE = #{status.value}), " +
-            "#{notes}, #{dateCreated}, #{dateResolved}, #{contactName}, #{contactPhone}, #{contactEmail}, #{createdBy})")
+            "#{notes}, #{dateCreated}, #{dateResolved}, #{dateVisited}, #{estimatedArrivalTimeDeddie}, " +
+            "#{estimatedArrivalTimeFibergrid}, #{rootCause}, #{contactName}, #{contactPhone}, #{contactEmail}, #{createdBy})")
     @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "ID")
     int insertFault(FibergridFault fault);
 
@@ -56,6 +59,10 @@ public interface FIBERGRIDMapper {
             @Result(property = "notes", column = "NOTES"),
             @Result(property = "dateCreated", column = "DATE_CREATED"),
             @Result(property = "dateResolved", column = "DATE_RESOLVED"),
+            @Result(property = "dateVisited", column = "DATE_VISITED"),
+            @Result(property = "estimatedArrivalTimeDeddie", column = "ESTIMATED_ARRIVAL_TIME_DEDDIE"),
+            @Result(property = "estimatedArrivalTimeFibergrid", column = "ESTIMATED_ARRIVAL_TIME_FIBERGRID"),
+            @Result(property = "rootCause", column = "ROOT_CAUSE"),
             @Result(property = "contactName", column = "CONTACT_NAME"),
             @Result(property = "contactPhone", column = "CONTACT_PHONE"),
             @Result(property = "contactEmail", column = "CONTACT_EMAIL"),
@@ -235,4 +242,39 @@ public interface FIBERGRIDMapper {
             @Result(property = "descriptionGr", column = "DESCRIPTION_GR")
     })
     List<java.util.Map<String, Object>> getAllFlags();
+
+    // ==================== Outbound Configuration ====================
+
+    /**
+     * Get outbound API configuration.
+     * Returns the active configuration for making outbound calls to Fibergrid.
+     */
+    @Select("SELECT * FROM H_PFR_FBG_OUTBOUND_CONFIG WHERE IS_ACTIVE = 1")
+    @Results({
+            @Result(property = "id", column = "ID"),
+            @Result(property = "baseUrl", column = "BASE_URL"),
+            @Result(property = "apiToken", column = "API_TOKEN"),
+            @Result(property = "clientName", column = "CLIENT_NAME"),
+            @Result(property = "clientVersion", column = "CLIENT_VERSION"),
+            @Result(property = "enabled", column = "IS_ENABLED"),
+            @Result(property = "active", column = "IS_ACTIVE"),
+            @Result(property = "maxRetries", column = "MAX_RETRIES"),
+            @Result(property = "initialDelayMs", column = "INITIAL_DELAY_MS"),
+            @Result(property = "backoffMultiplier", column = "BACKOFF_MULTIPLIER"),
+            @Result(property = "maxDelayMs", column = "MAX_DELAY_MS"),
+            @Result(property = "connectTimeoutMs", column = "CONNECT_TIMEOUT_MS"),
+            @Result(property = "readTimeoutMs", column = "READ_TIMEOUT_MS"),
+            @Result(property = "created", column = "CREATED"),
+            @Result(property = "lastUpdated", column = "LAST_UPDATED")
+    })
+    FibergridOutboundConfig getOutboundConfig();
+
+    /**
+     * Check if a request_id has already been successfully processed (for idempotency).
+     * Used to prevent duplicate outbound calls on retries.
+     */
+    @Select("SELECT COUNT(1) FROM PFR_FBG_API_LOGS " +
+            "WHERE DIRECTION = 'OUTBOUND' AND REQUEST_ID = #{requestId} AND HTTP_STATUS BETWEEN 200 AND 299")
+    boolean isRequestIdProcessed(@Param("requestId") String requestId);
+
 }
